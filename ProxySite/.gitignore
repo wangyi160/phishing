@@ -1,0 +1,20 @@
+*.class
+
+#maven
+target
+
+#mac
+.DS_Store
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+#idea
+.idea/
+
+#eclipse
+.settings/
+.project
+
