@@ -48,7 +48,7 @@ import com.proxy.utils.StringUtil;
 
 public class AllController {
 	
-	@RequestMapping(value="/**/*")
+	@RequestMapping(value= {"/**/*", "/*"})
 	
 	public ResponseEntity<byte[]> handle(HttpServletRequest request){
 		
@@ -57,7 +57,7 @@ public class AllController {
 		if(request.getMethod().equals("GET"))
 		{
 			Map<String, String[]> paramMap=request.getParameterMap();
-			String remoteUrl = StringUtil.makeRemoteUrl("https://www.daoway.cn"+path, paramMap);
+			String remoteUrl = StringUtil.makeRemoteUrl("https://www.dy2018.com"+path, paramMap);
 			
 			System.out.println(remoteUrl);
 			
@@ -65,34 +65,13 @@ public class AllController {
 		}
 		else
 		{
-			String remoteUrl="https://www.daoway.cn"+path;
+			String remoteUrl="https://www.dy2018.com"+path;
 			return remotePost(request, remoteUrl);
 		}
 	            		
 	}
 	
-	@RequestMapping(value="/*")
 	
-	public ResponseEntity<byte[]> rootHandle(HttpServletRequest request){
-		
-		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-		
-		if(request.getMethod().equals("GET"))
-		{
-			Map<String, String[]> paramMap=request.getParameterMap();
-			String remoteUrl = StringUtil.makeRemoteUrl("https://www.daoway.cn"+path, paramMap);
-			
-			System.out.println(remoteUrl);
-			
-			return remoteGet(request, remoteUrl);
-		}
-		else
-		{
-			String remoteUrl="https://www.daoway.cn"+path;
-			return remotePost(request, remoteUrl);
-		}
-	            		
-	}
 	
 
 //	@RequestMapping(value="/css/{extension:.*}", produces="text/css; charset=utf-8")
@@ -121,8 +100,15 @@ public class AllController {
 			String value=request.getHeader(name);
 				
 			System.out.println(name+"->"+value);
-			if(StringUtil.captalize(name).equals("Host"))
+			if(name.equals("host"))
 			{
+			}
+			// 因为httpclient暂时不支持brotli压缩，所以需要把该选项去掉
+			else if(name.equals("accept-encoding") && value.contains("br"))
+			{
+				value=value.replace("br", "");
+				
+				remoteRequest.setHeader(StringUtil.captalize(name), value);
 			}
 			else
 				remoteRequest.setHeader(StringUtil.captalize(name), value);
@@ -147,7 +133,8 @@ public class AllController {
 			{
 				System.out.println(h.getName()+":"+h.getValue());
 				
-				if(h.getName().equals("Transfer-Encoding"))
+				// remove hop by hop header
+				if(h.getName().equals("Transfer-Encoding") || h.getName().equals("Connection"))
 					continue;
 				
 				hs.add(h.getName(), h.getValue());
@@ -236,7 +223,7 @@ public class AllController {
 			{
 			}
 			else
-				remoteRequest.setHeader(name, value);
+				remoteRequest.setHeader(StringUtil.captalize(name), value);
 		}
 		
 		System.out.println("-----------------------------");
@@ -258,7 +245,7 @@ public class AllController {
 			{
 				System.out.println(h.getName()+":"+h.getValue());
 				
-				if(h.getName().equals("Transfer-Encoding"))
+				if(h.getName().equals("Transfer-Encoding") )
 					continue;
 				
 				hs.add(h.getName(), h.getValue());

@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.tika.parser.txt.CharsetDetector;
 import org.apache.tika.parser.txt.CharsetMatch;
 
+
 public class StringUtil {
 
 	public static String captalize(String name)
@@ -18,7 +19,27 @@ public class StringUtil {
 		if(name.length()==0)
 			return name;
 		
-		return name.substring(0,1).toUpperCase()+name.substring(1);
+		StringBuffer sb=new StringBuffer();
+		
+		boolean shouldCap=true;
+		for(int i=0;i<name.length();i++)
+		{
+			String c=name.substring(i,i+1);
+			if(shouldCap)
+			{
+				sb.append(c.toUpperCase());
+				shouldCap=false;
+			}
+			else
+			{
+				sb.append(c);
+			}
+			
+			if(c.equals("-"))
+				shouldCap=true;
+		}
+		
+		return sb.toString();
 	}
 	
 	public static String makeRemoteUrl(String url, Map<String, String[]> paramMap)
